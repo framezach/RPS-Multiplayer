@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+<!-- So I tried for the RPS assignment, and found out that it was way harder than I thought it'd be. I made a lot of decent headway and I think I could make it work given enough time. I'm gonna poke away at it some more. I pseudo coded in missing elements.  I tried to focus on things that were challenging rather than some of the simpler elements, like adding buttons and appending HTML. Making a multipalyer game is hard!  -->
+
+<html lang="en-us">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Rock Paper Scissors</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
+    <style>
+      #chat-output {
+        background-color: grey;
+        border: none;
+        color: #FFF;
+      }
+
+    </style>
+
+  </head>
+
+  <body>
+
+    <!--- Jumbotron - where our game will be -->
+    <div class="jumbotron">
+      <h1 class="text-center">Rock Paper Scissors</h1>
+      <div class="player-one-choice"></div>
+      <div class="player-two-choice"></div>
+      <div class="scoreboard"></div>
+    </div>
+
+    <!-- Chat Input -->
+    <div class="col-lg-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Chat: </h3>
+        </div>
+        <div class="panel-body">
+          <!-- Here's where our chat input will go! -->
+          <form role="form">
+            <div class="form-group">
+              <label for="user-input">Username:</label>
+              <input class="form-control" id="user-input" type="text">
+            </div>
+            <div class="form-group">
+              <label for="chat-input">Chat:</label>
+              <input class="form-control" id="chat-input" type="text">
+              <button class="btn btn-default" id="post" type="submit">Chat</button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+    <!-- Chat Output -->
+    <div class="col-lg-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Chat Room</h3>
+        </div>
+        <div class="panel-body">
+          <!-- Actual output is going to end up here. -->
+          <div id="chat-output"></div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.11.0/firebase.js"></script>
+    <script>
+      // Firebase Initialization
+      var config = {
+        apiKey: "AIzaSyBwK5FPqHRjpc62q5wcZLdOt-c8hy29K2M",
+        authDomain: "rockpaperscissors-98b38.firebaseapp.com",
+        databaseURL: "https://rockpaperscissors-98b38.firebaseio.com",
+        projectId: "rockpaperscissors-98b38",
+        storageBucket: "rockpaperscissors-98b38.appspot.com",
+        messagingSenderId: "504766718095"
+      };
+      firebase.initializeApp(config);
+
+      var database = firebase.database();
+      // Chat Application
+
+      // Chat Variables
+      var textInput = "";
+      var userName = "";
+
+      // Button - Allows the input of a username + some chat.
+      $("#post").on("click", function () {
+        event.preventDefault();
+
+        userName = $("#user-input").val().trim();
+        textInput = $("#chat-input").val().trim();
+        console.log(textInput);
+        // Pushes the user input's username and chat to the database.
+        database.ref().push({
+          userName: userName,
+          textInput: textInput,
+        })
+      });
+
+      // Takes a snapshot of what's in the database.
+      database.ref().on("child_added", function (childSnapshot) {
+        console.log(childSnapshot.val());
+        console.log(childSnapshot.val().userName);
+        console.log(childSnapshot.val().textInput);
+      }, function (errorObject) {
+        console.log("Errors handled: " + errorObject.code);
+      });
+
+      // Whenever a child is added to the database, it takes that child and displays it, appending it to a chat area created
+      database.ref().on("child_added", function (snap) {
+        var newChat = $("<tr> <td>" + snap.val().userName + ":  " + "</td><td>" + snap.val().textInput +
+          "</td></tr>")
+        console.log(snap.val().userName);
+        $("#chat-output").append(newChat);
+      })
+
+      // Lets start on our Rock Paper Scissors!
+      // Start with some variables
+      // I wanted to try to make this capable of limiting number of players to only two players, tried using some tutorials, but didn't have much luck. Spent quite a bit of time on it, but nothing I was trying worked well.
+
+      var num_players = 2;
+      var game_location = 'https://rockpaperscissors-98b38.firebaseio.com';
+      var player_location = 'player_list';
+      var player_data_location = 'player_data';
+      var player_score = 'player_score';
+
+      var myPlayerNumber = '';
+      var myUserId = '';
+      var myChoice = '';
+
+      // This prompts you to put in your username. Now here's where I got stumped; affixing two usernames. :(
+      function getMyUserId() {
+        return prompt('Username?', 'Guest');
+      }
+      getMyUserId();
+
+      // This takes a player's choice. It takes a player number, user ID, and their choice. Sets it to the Firebase location of the input player.
+
+      function playerChoice(myPlayerNumber, myUserId, myChoice) {
+        var playerDataRef = new Firebase(game_location);
+        child(player_data_location).child(myPlayerNumber);
+        // Changes game state to "picked"
+        playerDataRef.set({
+          userId: myUserId,
+          state: 'picked',
+          rps: myRPS
+        });
+      }
+
+      function playerTwoChoice(myPlayerNumber, myUserId, myChoice) {
+        var playerDataRef = new Firebase(game_location);
+        child(player_data_location).child(myPlayerNumber);
+        // Changes game state to "picked"
+        playerDataRef.set({
+          userId: myUserId,
+          state: 'picked',
+          rps: myRPS
+        });
+      }
+
+      // Function if statement for if the game is "full" on players then given alert " can't join"
+
+      // Reset elements upon new player joining
+
+      // Create persistent data elements for player data
+
+      // Set player numbers
+
+      var playerTwo = myPlayerNumber === 0 ? 1 : 0;
+
+      // Check snapshot for data from each player
+
+      playerScoresRef.on('value', function (snapshot) {
+        $("#scoreboard").empty();
+        snapshot.forEach(function (childSnapshot) {
+          if (childSnapshot.name() === myUserId) {
+            $("scoreboard").append("<li class='your-score'>" + childSnapshot.name() + ": " + childSnapshot.val()[
+              0] + " wins, " + childSnapshot.val()[1] + " losses</li>");
+          } else {
+            $("#scoreboard").append("<li>" + childSnapshot.name() +
+              ": " + childSnapshot.val()[0] + " wins, " + childSnapshot.val()[1] +
+              " losses</li>");
+          };
+        });
+      });
+
+      // RPS Logic
+
+      // Upon doing a little digging around, I learned about the Switch statement, and this is what it's supposed to look like for RPS
+      function rockPaperScissors(playerChoice, playerTwoChoice) {
+        switch (yourRPS) {
+          case 'rock':
+            switch (playerTwoChoice) {
+              case 'rock':
+                return 'draw';
+              case 'paper':
+                return 'lose';
+              case 'scissors':
+                return 'win';
+            }
+            break;
+          case 'paper':
+            switch (playerTwoChoice) {
+              case 'rock':
+                return 'win';
+              case 'paper':
+                return 'draw';
+              case 'scissors':
+                return 'lose';
+            }
+            break;
+          case 'scissors':
+            switch (playerTwoChoice) {
+              case 'rock':
+                return 'lose';
+              case 'paper':
+                return 'win';
+              case 'scissors':
+                return 'draw';
+            }
+            break;
+        }
+      }
+
+// Check if both players have picked
+
+// Check if you won or lost
+
+// Empty scoreboard
+
+// Maybe display a play again button?
+
+
+    </script>
+  </body>
+
+</html>
